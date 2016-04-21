@@ -56,7 +56,8 @@ public class NetModule {
 
     @Provides
     @Singleton
-    Retrofit provideRetrofit(Gson gson, RxJavaCallAdapterFactory rxJavaCallAdapterFactory, OkHttpClient okHttpClient) {
+    Retrofit provideRetrofit(Gson gson, RxJavaCallAdapterFactory rxJavaCallAdapterFactory,
+                             OkHttpClient okHttpClient) {
         Retrofit retrofit = new Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .addCallAdapterFactory(rxJavaCallAdapterFactory)

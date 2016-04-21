@@ -30,8 +30,8 @@ public class HistoryCursorAdapter extends CursorAdapter {
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view = inflater.inflate(R.layout.item_search_suggestion, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_search_suggestion,
+                parent, false);
         suggestionText = (TextView) view.findViewById(R.id.suggestionText);
         return view;
     }

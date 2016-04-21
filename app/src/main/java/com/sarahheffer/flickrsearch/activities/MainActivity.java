@@ -1,6 +1,5 @@
 package com.sarahheffer.flickrsearch.activities;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.MatrixCursor;
 import android.graphics.drawable.ColorDrawable;
@@ -44,14 +43,15 @@ import rx.Observable;
 import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+        implements RecyclerGridAdapter.OnItemClickListener {
 
     private final static String TAG = MainActivity.class.getSimpleName();
     private final static String HISTORY_SET = "history_set";
     private final static String SEARCH_TERM = "search_term";
-//    private final static String IMAGE_LIST = "image_list";
 
     private static final int FIRST_PAGE = 1;
+    private static final int NUM_SPANS = 3;
 
     @Bind(R.id.imageGrid)
     RecyclerView imageGridView;
@@ -94,17 +94,12 @@ public class MainActivity extends AppCompatActivity {
         readQueryHistory();
         imageList = new ArrayList<>();
 
-        gridLayoutManager = new GridLayoutManager(this, 3);
+        gridLayoutManager = new GridLayoutManager(this, NUM_SPANS);
         imageGridView.setHasFixedSize(false);
         imageGridView.setLayoutManager(gridLayoutManager);
 
-        gridAdapter = new RecyclerGridAdapter(this, imageList);
-        gridAdapter.setOnItemClickListener(new RecyclerGridAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(Context context, Image image) {
-                showImage(context, image);
-            }
-        });
+        gridAdapter = new RecyclerGridAdapter(this, imageList, NUM_SPANS);
+        gridAdapter.setOnItemClickListener(this);
         imageGridView.setAdapter(gridAdapter);
         imageGridView.addOnScrollListener(new EndlessRecyclerViewScrollListener(gridLayoutManager) {
             @Override
@@ -122,7 +117,8 @@ public class MainActivity extends AppCompatActivity {
         this.menu = menu;
 
         searchView = (SearchView) menu.findItem(R.id.search).getActionView();
-        AutoCompleteTextView searchText = (AutoCompleteTextView) searchView.findViewById(R.id.search_src_text);
+        AutoCompleteTextView searchText =
+                (AutoCompleteTextView) searchView.findViewById(R.id.search_src_text);
         searchText.setThreshold(1);
         searchView.setMaxWidth(Integer.MAX_VALUE);
         searchView.setIconifiedByDefault(true);
@@ -149,7 +145,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle savedInstanceState) {
         savedInstanceState.putString(SEARCH_TERM, searchTerm);
-//        savedInstanceState.putParcelableArrayList(IMAGE_LIST, imageList);
         super.onSaveInstanceState(savedInstanceState);
     }
 
@@ -158,8 +153,6 @@ public class MainActivity extends AppCompatActivity {
         super.onRestoreInstanceState(savedInstanceState);
 
         searchTerm = savedInstanceState.getString(SEARCH_TERM);
-//        ArrayList<Image> images = savedInstanceState.getParcelableArrayList(IMAGE_LIST);
-//        updateImageList(images);
         if (searchTerm != null) {
             getData(FIRST_PAGE);
         }
@@ -212,7 +205,8 @@ public class MainActivity extends AppCompatActivity {
             }
 
             final SearchView search = (SearchView) menu.findItem(R.id.search).getActionView();
-            search.setSuggestionsAdapter(new HistoryCursorAdapter(this, cursor, filteredHistoryItems));
+            search.setSuggestionsAdapter(new HistoryCursorAdapter(this, cursor,
+                    filteredHistoryItems));
             search.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
                 @Override
                 public boolean onSuggestionSelect(int position) {
@@ -239,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
         return filteredHistoryItems;
     }
 
-    public void showImage(Context context, Image image) {
+    public void showImage(Image image) {
         ImageView imageView = new ImageView(this);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setView(imageView);
@@ -250,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
                 new ColorDrawable(android.graphics.Color.TRANSPARENT));
         alertDialog.show();
 
-        Picasso.with(context).load(image.getImageURL()).into(imageView);
+        picasso.load(image.getImageURL()).into(imageView);
     }
 
     private void addNewQueryHistory(String searchQuery) {
@@ -283,5 +277,10 @@ public class MainActivity extends AppCompatActivity {
     private void displayLoadingSpinner() {
         emptyView.setVisibility(View.GONE);
         loadingSpinner.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onItemClick(Image image) {
+        showImage(image);
     }
 }

@@ -19,6 +19,7 @@ public class ImageService {
         String format = "json";
         int noJsonCallback = 1;
         int safeSearch = 1;
-        return flickrApiInterface.getImages(method, apikey, format, noJsonCallback, safeSearch, searchTerm, page);
+        return flickrApiInterface.getImages(method, apikey, format, noJsonCallback, safeSearch,
+                searchTerm, page);
     }
 }

@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.sarahheffer.flickrsearch.R;
+import com.sarahheffer.flickrsearch.app.FlickrSearchApp;
 import com.sarahheffer.flickrsearch.models.Image;
 import com.squareup.picasso.Picasso;
 
@@ -24,41 +25,38 @@ public class RecyclerGridAdapter extends RecyclerView.Adapter<RecyclerGridAdapte
     Picasso picasso;
 
     private List<Image> imageList;
-    private Context context;
+    private OnItemClickListener listener;
     private int imageSize;
-    private static OnItemClickListener listener;
+    private int numSpans;
 
-    public RecyclerGridAdapter(Context context, List<Image> images) {
+    public RecyclerGridAdapter(Context context, List<Image> images, int numSpans) {
+        ((FlickrSearchApp) context.getApplicationContext()).getAppComponent().inject(this);
         this.imageList = images;
-        this.context = context;
+        this.numSpans = numSpans;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_image, null);
         ViewHolder viewHolder = new ViewHolder(view);
-        imageSize = parent.getMeasuredWidth();
+        imageSize = parent.getMeasuredWidth()/numSpans;
         return viewHolder;
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         Image image = imageList.get(position);
-//        Picasso.with(context).setIndicatorsEnabled(true);
-        picasso.with(context).load(image.getImageURL()).resize(imageSize, imageSize).centerCrop().into(holder.imageView);
+        picasso.load(image.getImageURL()).resize(imageSize, imageSize).centerCrop()
+                .into(holder.imageView);
     }
 
     @Override
     public int getItemCount() {
-        if (imageList != null) {
-            return imageList.size();
-        } else {
-            return 0;
-        }
+        return imageList == null ? 0 : imageList.size();
     }
 
     public interface OnItemClickListener {
-        void onItemClick(Context context, Image image);
+        void onItemClick(Image image);
     }
 
     public void setOnItemClickListener(OnItemClickListener listener) {
@@ -82,7 +80,7 @@ public class RecyclerGridAdapter extends RecyclerView.Adapter<RecyclerGridAdapte
             if (position == RecyclerView.NO_POSITION) {
                 return;
             }
-            listener.onItemClick(context, imageList.get(position));
+            listener.onItemClick(imageList.get(position));
         }
     }
 }
